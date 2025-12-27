@@ -1,4 +1,5 @@
-#🚀 NudgeAI
+# 🚀 NudgeAI
+
 An MCP-powered AI Task & Reminder Agent
 
 NudgeAI is an AI-driven task and reminder system that acts like a personal sidekick — creating tasks, tracking progress, and nudging you at the right time using intelligent tool-calling via Model Context Protocol (MCP).
@@ -27,21 +28,35 @@ This project is designed to be beginner-friendly, yet showcases real AI agent ar
 🖥️ Simple UI built with Jinja templates
 
 🏗️ Tech Stack
+
 Backend: FastAPI
+
 AI / Agents: Custom MCP Server
+
 LLM Integration: OpenAI-compatible client
+
 Database: SQLite (easily swappable)
+
 Frontend: Jinja2 Templates + HTML/CSS + HTMX
 
 🧩 Architecture Overview
+
 User
+
 ↓
+
 LLM (Reasoning)
+
 ↓ decides tool
+
 MCP Server
+
 ↓ executes
+
 Tool (Task / Reminder / Notify)
+
 ↓
+
 Database / Action
 
 🔑 The LLM never directly modifies data — it only chooses tools.
