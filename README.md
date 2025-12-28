@@ -1,81 +1,178 @@
-# 🚀 NudgeAI
+# MCP Todo Application
 
-An MCP-powered AI Task & Reminder Agent
+> An AI-powered todo manager using the Model Context Protocol (MCP) pattern with FastAPI, MongoDB, HTMX, and OpenRouter LLM.
 
-NudgeAI is an AI-driven task and reminder system that acts like a personal sidekick — creating tasks, tracking progress, and nudging you at the right time using intelligent tool-calling via Model Context Protocol (MCP).
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)
+![MongoDB](https://img.shields.io/badge/MongoDB-6.0+-green.svg)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-Instead of manually managing to-do lists, you simply talk to NudgeAI. (Text or Voice)
+## 🎯 Overview
 
-“If I haven’t finished Python by 8 PM, remind me.”
+This application demonstrates the MCP (Model Context Protocol) pattern where an LLM acts as a reasoning engine that selects tools, while FastAPI endpoints execute those tools against MongoDB. The LLM **never** directly accesses the database.
 
-🧩 Uses a Custom MCP to let the LLM decide which action to take
+### Architecture
 
-🛠️ Clean separation between reasoning (LLM) and execution (tools)
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌──────────┐
+│   Browser   │────▶│  LLM Router  │────▶│  OpenRouter │    │          │
+│   (HTMX)    │     │  /llm/chat   │◀────│     LLM     │     │  MongoDB │
+└─────────────┘     └──────────────┘     └─────────────┘     └──────────┘
+       │                   │                                       ▲
+       │                   ▼ Tool Selection                        │
+       │            ┌──────────────┐                               │
+       └───────────▶│   Endpoints  │───────────────────────────────┘
+                    │   /todos/*   │
+                    └──────────────┘
+```
 
-💬 Natural language → real actions
+### Key Features
 
-This project is designed to be beginner-friendly, yet showcases real AI agent architecture.
+- 🧠 **Natural Language Interface** - Ask the AI to manage your todos
+- 📋 **Full CRUD Operations** - Create, read, update, delete todos
+- ⚡ **HTMX Frontend** - Dynamic updates without page reloads
+- 🔧 **MCP Pattern** - Clean separation between reasoning and execution
+- 🎨 **Modern UI** - Glassmorphism design with smooth animations
 
-✨ Key Features
+## 📁 Project Structure
 
-💬 Chat with an AI agent to manage tasks
+```
+src/
+├── main.py                 # FastAPI app entry point
+├── config.py               # Environment configuration
+├── database.py             # MongoDB connection management
+├── schemas.py              # Pydantic models
+├── mcp
+│   ├──mcp.py               # MCP tools defined
+├── routers/
+│   ├── endpoints.py        # Todo CRUD routes
+│   ├── llm.py              # MCP/LLM router
+│   └── helpers/
+│       ├── endpoint_helper.py  # Database operations
+│       └── llm_helper.py       # OpenRouter client & MCP tools
+├── templates/
+│   ├── index.html          # Main page
+│   └── partials/           # HTMX partial templates
+└── static/
+    └── css/
+        └── styles.css      # Custom styles
+```
 
-✅ Create, list, and complete tasks
-⏱️ Time-based reminders
+## 🚀 Quick Start
 
-🧠 MCP-based tool calling (LLM does not handle logic)
+### Prerequisites
 
-🖥️ Simple UI built with Jinja templates
+- Python 3.10+
+- MongoDB 6.0+ (running locally or MongoDB Atlas)
+- OpenRouter API key ([Get one here](https://openrouter.ai/keys))
 
-🏗️ Tech Stack
+### Installation
 
-Backend: FastAPI
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/nudgeai.git
+   cd nudgeai
+   ```
 
-AI / Agents: Custom MCP Server
+2. **Create virtual environment**
+   ```bash
+   python -m venv venv
+   
+   # Windows
+   venv\Scripts\activate
+   
+   # macOS/Linux
+   source venv/bin/activate
+   ```
 
-LLM Integration: OpenAI-compatible client
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Database: SQLite (easily swappable)
+4. **Configure environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your values
+   ```
 
-Frontend: Jinja2 Templates + HTML/CSS + HTMX
+5. **Start MongoDB** (if running locally)
+   ```bash
+   mongod
+   ```
 
-🧩 Architecture Overview
+6. **Run the application**
+   ```bash
+   uvicorn src.main:app --reload
+   ```
 
-User
+7. **Open in browser**
+   ```
+   http://localhost:8000
+   ```
 
-↓
+## ⚙️ Configuration
 
-LLM (Reasoning)
+Create a `.env` file based on `.env.example`:
 
-↓ decides tool
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `MONGODB_URI` | MongoDB connection string | ✅ | - |
+| `MONGODB_DB_NAME` | Database name | ✅ | - |
+| `OPENROUTER_API_KEY` | OpenRouter API key | ✅ | - |
+| `OPENROUTER_MODEL` | LLM model identifier | ❌ | `xiaomi/mimo-v2-flash:free` |
+| `APP_NAME` | Application display name | ❌ | `MCP Todo` |
 
-MCP Server
+## 📚 API Documentation
 
-↓ executes
+Once running, access the interactive API docs:
 
-Tool (Task / Reminder / Notify)
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
 
-↓
+### Endpoints
 
-Database / Action
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/` | Main application page |
+| `GET` | `/health` | Health check |
+| `GET` | `/todos/` | List all todos |
+| `POST` | `/todos/` | Create a todo |
+| `GET` | `/todos/{id}` | Get a single todo |
+| `PUT` | `/todos/{id}` | Update a todo |
+| `DELETE` | `/todos/{id}` | Delete a todo |
+| `POST` | `/todos/{id}/toggle` | Toggle completion |
+| `POST` | `/llm/chat` | Natural language interface |
 
-🔑 The LLM never directly modifies data — it only chooses tools.
+## 🧠 MCP Tools
 
-🛠️ MCP Tools Implemented
-(still under-development)
+The LLM has access to these tools for todo management:
 
-🧪 Example Prompts
+| Tool | Description | Parameters |
+|------|-------------|------------|
+| `create_todo` | Create a new todo | `title*`, `description`, `due_date` |
+| `list_todos` | Get all todos | `completed` (optional filter) |
+| `update_todo` | Update existing todo | `todo_id*`, `title`, `description`, `due_date`, `completed` |
+| `delete_todo` | Delete a todo | `todo_id*` |
+| `toggle_complete` | Toggle todo status | `todo_id*` |
 
-1. “Create a task to study calculus by 7 PM”
-2. “What tasks do I have today?”
-3. “If I haven’t finished DSA by 9, remind me”
-4. “Mark my Python task as done”
+## 🤝 Contributing
 
-🤝 Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Contributions are welcome!
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-Feel free to open issues or submit pull requests.
+## 📄 License
 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-Built with ❤️ by Adarsh
+## 🙏 Acknowledgments
+
+- [FastAPI](https://fastapi.tiangolo.com/) - Modern Python web framework
+- [HTMX](https://htmx.org/) - High power tools for HTML
+- [OpenRouter](https://openrouter.ai/) - LLM API gateway
+- [Motor](https://motor.readthedocs.io/) - Async MongoDB driver
